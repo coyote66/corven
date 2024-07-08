@@ -1,0 +1,176 @@
+<html>
+    <header>
+        <style type="text/css">
+            body{
+                margin:30px;
+            }
+            table{
+                margin:10px;
+            }
+        </style>
+    </header>
+    <body>
+        <h1>Documentacion desaf&iacute;o t&eacute;cnico CORVEN</h1>
+
+        <h2>Configuraci&oacute;n de entorno de desarrollo local</h2>
+        
+        <p>
+            Repositorio en GitHub : <a href="https://github.com/coyote66/corven">https://github.com/coyote66/corven</a><br>
+            <pre>
+             git clone https://github.com/coyote66/corven.git
+            </pre>
+        </p>
+        
+        <h3>Para la ejecucion local del proyecto seguir los siguientes pasos:</h3>
+
+            <ul>
+                <li>Instalar el IDE IntelliJ community edition <a href="https://www.jetbrains.com/idea/download/">https://www.jetbrains.com/idea/download/</a></li>
+                <li>Instalar el motor de base de datos MySQL (se sugiere el software XAMPP) <a href="https://www.apachefriends.org/es/download.html">https://www.apachefriends.org/es/download.html</a></li>
+                <li>Ejecutar el script de creacion de base de datos (<a href="script.zip">script.sql</a> ) en Workbrench o phpMyAdmin (este ultimo es provisto con el software XAMPP)</li>
+                <li>Abrir y ejecutar el proyecto desde IntelliJ</li>
+            </ul>
+
+            <h3>Base de datos</h3>
+             
+            <p>Crear la base de datos db-corven</p>
+            
+            <strong>Entorno local</strong><br>
+            <p>
+                EndPoint:localhost
+                Nombre: db-corven<br>
+                Usuario:root<br>
+                Password:<br>
+            </p>
+
+            <strong>Amazon AWS</strong><br>
+            
+
+            <p>El motor de la base de datos es MySQl, la misma se creo tambien en AWS mediante el servicio RDS:<br>
+                EndPoint: db-corven.ch62eyyacjdn.us-east-1.rds.amazonaws.com
+                Nombre: db-corven<br>
+                Usuario:root<br>
+                Password:$testcorvenpwd#<br>
+            </p>
+
+            <h3>CURLs para test de endpoints locales</h3>
+
+            <p>En Amazon AWS se encontraron problemas con la configuracion de Elastic Beanstalk y RDS, sin embargo la base de datos esta publicada y funcionando, la api local puede apuntarse a la base de datos publicada en AWS.</p>
+            
+            <h4>1) person/save</h4>
+            <p>Inserta un nueva entidad "Persona" en la base de datos, la clave de la misma esta compuesta por los campos document_type, document_number, country_code y genero, con lo cual la misma persona no podra repetirse.</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/save' \
+    --header 'Content-Type: application/json' \
+    --data-raw '        {
+                "documentType": "DNI",
+                "documentNumber": 30397352,
+                "countryCode" : "PY",
+                "gender":"F",
+                "name":"Laura",
+                "lastName":"Peña",
+                "email":"larape@gmail.com",
+                "bornDate":"1983-07-14"
+                
+            }
+    '
+            </pre>
+        
+            <h4>2) person/save</h4>
+            <p>Actualiza una entidad "Persona" debe proporcionarse el campo ID.</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/save' \
+    --header 'Content-Type: application/json' \
+    --data-raw '        {
+                "id" : 302,
+                "documentType": "DNI",
+                "documentNumber": 27434786,
+                "countryCode" : "AR",
+                "gender":"M",
+                "name":"Leandro",
+                "lastName":"Mourino",
+                "email":"lmourio@gmail.com",
+                "bornDate":"2022-12-11"
+                
+            }
+    '
+            </pre>          
+       
+        
+            <h4>3) person/delete</h4>
+            <p>Elimina una entidad "Persona" de la base de datos.</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/delete' \
+    --header 'Content-Type: application/json' \
+    --data-raw '        {
+                "id" : 352,
+                "documentType": "DNI",
+                "documentNumber": 27434786,
+                "countryCode" : "AR",
+                "gender":"M",
+                "name":"Leandro",
+                "lastName":"Mouriño",
+                "email":"lmourio@gmail.com",
+                "bornDate":"1979-12-11"
+                
+            }
+    '
+            </pre>       
+        
+            <h4>4) person/relation/:id1/parent/:id2/:type</h4>
+            <p>Relaciona la persona id1 con la persona id2, el tipo de relacion sera determinado por type, puede ser uno de los siguientes:<br>
+                <table width="150px" border="1" cellpadding="1px" cellspacing="1px">
+                    <tr>
+                        <td><b>ID</b></td><td><b>NOMBRE</b></td>
+                    </tr>
+                    <tr>
+                        <td>1</td><td>HERMAN@</td>
+                    </tr>
+                    <tr>
+                        <td>2</td><td>PRIM@</td>
+                    </tr>
+                    <tr>
+                        <td>3</td><td>TI@</td>
+                    </tr>
+                </table>
+            </p>
+            <pre>
+    curl --location --request POST 'http://localhost:5000/person/relation/353/parent/402/1' \
+    --data ''
+            </pre> 
+
+
+            <h4>5) person/relation</h4>
+            <p>Retorna todas las relaciones de una Persona.</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/relation/353/402' \
+    --data ''
+            </pre>  
+
+            <h4>6) person/all</h4>
+            <p>Retorna todas las Personas de la base de datos.</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/all'
+            </pre> 
+
+            <h4>7) person/byid?id=:id</h4>
+            <p>Retorna una persona por su id.</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/byid?id=402' \
+    --data ''
+            </pre> 
+
+            <h4>8) person/statistics</h4>
+            <p>Retorna estadisticas, cantidad de hombres, cantidad de mujers y el porcentaje de Argentinos sobre el total</p>
+            <pre>
+    curl --location 'http://localhost:5000/person/statistics' \
+    --data ''
+            </pre> 
+
+            <h4>Collection de PostMan</h4>
+
+            <a href="collection_postman.zip">collection_postman.zip</a>
+    </body>
+
+</html>
+
+
